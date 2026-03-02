@@ -12,9 +12,10 @@ dependencies = [
     "streamlit (>=1.54.0,<2.0.0)",
     "openpyxl (>=3.1.5,<4.0.0)",
 ]
+package-mode = false
 
 packages = [
-    { include = "app.py" }
+    { include = "dashboard_lotes" }
 ]
 
 
