@@ -5,6 +5,7 @@ description = ""
 authors = [
     {name = "Mateus Benvenuti",email = "mateusjbenvenuti@gmail.com"}
 ]
+package-mode = false
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -12,11 +13,7 @@ dependencies = [
     "streamlit (>=1.54.0,<2.0.0)",
     "openpyxl (>=3.1.5,<4.0.0)",
 ]
-package-mode = false
 
-packages = [
-    { include = "dashboard_lotes" }
-]
 
 
 [build-system]
