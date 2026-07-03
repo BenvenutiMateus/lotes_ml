@@ -165,15 +165,29 @@ else:
 st.divider()
 
 # ======================================================
+# 💰 CÁLCULO BASE DE LANCE MÁXIMO (Para Visão Executiva)
+# ======================================================
+# Calculando um valor sugerido usando parâmetros padrão (15% lucro, 30% custos, 10% desconto)
+pesos_padrao = {"A": 1.0, "B": 0.9, "C": 0.6, "D": 0.35, "E": 0.1, "U": 0.25}
+df_temp = df.copy()
+df_temp["peso_venda"] = df_temp["Grade"].map(pesos_padrao).fillna(0)
+v_recuperavel_base = (df_temp["Valor Total"] * df_temp["peso_venda"]).sum()
+faturamento_base = v_recuperavel_base * (1 - 0.10) # 10% desconto
+despesas_base = faturamento_base * 0.30 # 30% custos
+lucro_base = faturamento_base * 0.15 # 15% lucro
+lance_maximo_base = faturamento_base - despesas_base - lucro_base
+
+# ======================================================
 # 📊 KPIs
 # ======================================================
-k1, k2, k3, k4, k5 = st.columns(5)
+k1, k2, k3, k4, k5, k6 = st.columns(6)
 # Removido o delta do k1 para não gerar setinha vermelha/verde confusa. Foco no número seco.
 k1.metric("Score Geral", f"{score_final*100:.1f} / 100") 
 k2.metric("Ticket Médio", f"R$ {ticket_medio:.2f}")
 k3.metric("Diversificação (HHI)", f"{hhi:.3f}")
 k4.metric("Dependência Top 3", f"{top3_share:.1%}")
 k5.metric("Score de Risco", f"{score_risco*100:.1f} / 100")
+k6.metric("Lance Máximo Sugerido", f"R$ {lance_maximo_base:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
 
 st.write("") # Espaçamento
 
