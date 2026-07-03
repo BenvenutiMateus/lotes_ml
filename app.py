@@ -92,14 +92,12 @@ score_diversificacao = 1 - hhi
 # 3️⃣ TICKET MÉDIO SAUDÁVEL (0–1)
 # ======================================================
 ticket_medio = valor_total_lote / qtd_total
-ticket_min, ticket_max = 80, 200
+ticket_min = 80
 
-if ticket_min <= ticket_medio <= ticket_max:
+if ticket_medio >= ticket_min:
     score_ticket = 1
-elif ticket_medio < ticket_min:
-    score_ticket = ticket_medio / ticket_min
 else:
-    score_ticket = ticket_max / ticket_medio
+    score_ticket = ticket_medio / ticket_min
 
 score_ticket = np.clip(score_ticket, 0, 1)
 
@@ -121,7 +119,7 @@ score_conc = score_concentracao(top3_share)
 # ======================================================
 # 5️⃣ RISCO OPERACIONAL (0–1)
 # ======================================================
-df["fora_ticket"] = ((df["Valor Unit"] < ticket_min) | (df["Valor Unit"] > ticket_max)).astype(int)
+df["fora_ticket"] = (df["Valor Unit"] < ticket_min).astype(int)
 
 # Penaliza itens de grade baixa, fora do ticket padrão e que tem muito volume (difíceis de escoar)
 df["risco_item"] = (
@@ -251,6 +249,54 @@ linha_risco = alt.Chart(pd.DataFrame({'x': [0.6]})).mark_rule(color='red', strok
 linha_capital = alt.Chart(pd.DataFrame({'y': [df['Valor Total'].mean() * 2]})).mark_rule(color='orange', strokeDash=[5, 5]).encode(y='y')
 
 st.altair_chart(scatter + linha_risco + linha_capital, use_container_width=True)
+
+# ======================================================
+# 📈 ANÁLISES DETALHADAS
+# ======================================================
+st.divider()
+st.title("📈 Análises Detalhadas do Lote")
+
+col_det1, col_det2 = st.columns(2)
+
+with col_det1:
+    st.markdown("##### 📊 Distribuição por Grade")
+    grade_df = df.groupby("Grade").agg({"Valor Total": "sum", "Qtd": "sum"}).reset_index()
+    chart_grade = alt.Chart(grade_df).mark_bar(cornerRadiusTop=4).encode(
+        x=alt.X("Grade:N", sort=["A", "B", "C", "D", "E", "U"]),
+        y=alt.Y("Valor Total:Q", title="Valor Total (R$)"),
+        color=alt.Color("Grade:N", scale=cores_grade_chart, legend=None),
+        tooltip=["Grade", "Qtd", alt.Tooltip("Valor Total:Q", format=",.2f")]
+    ).properties(height=350)
+    st.altair_chart(chart_grade, use_container_width=True)
+
+with col_det2:
+    if "Subcategoria" in df.columns:
+        st.markdown("##### 📑 Top 10 Subcategorias por Valor")
+        sub_df = df.groupby("Subcategoria")["Valor Total"].sum().reset_index().sort_values("Valor Total", ascending=False).head(10)
+        chart_sub = alt.Chart(sub_df).mark_bar(cornerRadiusEnd=4).encode(
+            x=alt.X("Valor Total:Q", title="Valor Total (R$)"),
+            y=alt.Y("Subcategoria:N", sort="-x", title="Subcategoria"),
+            color=alt.value("#3498db"),
+            tooltip=["Subcategoria", alt.Tooltip("Valor Total:Q", format=",.2f")]
+        ).properties(height=350)
+        st.altair_chart(chart_sub, use_container_width=True)
+    elif "Categoria" in df.columns:
+        st.markdown("##### 📑 Categorias por Valor")
+        cat_df = df.groupby("Categoria")["Valor Total"].sum().reset_index().sort_values("Valor Total", ascending=False).head(10)
+        chart_cat = alt.Chart(cat_df).mark_bar(cornerRadiusEnd=4).encode(
+            x=alt.X("Valor Total:Q", title="Valor Total (R$)"),
+            y=alt.Y("Categoria:N", sort="-x", title="Categoria"),
+            color=alt.value("#3498db"),
+            tooltip=["Categoria", alt.Tooltip("Valor Total:Q", format=",.2f")]
+        ).properties(height=350)
+        st.altair_chart(chart_cat, use_container_width=True)
+
+st.markdown("##### 🏆 Top 10 Itens Mais Valiosos do Lote")
+colunas_top = ["Descrição do Item", "Categoria", "Subcategoria", "Grade", "Qtd", "Valor Unit", "Valor Total"]
+colunas_existentes = [col for col in colunas_top if col in df.columns]
+top10_df = df.sort_values("Valor Total", ascending=False).head(10)[colunas_existentes]
+st.dataframe(top10_df, use_container_width=True, hide_index=True)
+
 
 # ======================================================
 # 💰 SIMULADOR DE LANCE MÁXIMO (PRECIFICAÇÃO REVERSA)
