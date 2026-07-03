@@ -322,9 +322,9 @@ peso_grade_u = col_sim4.number_input("📦 Aproveitamento Grade 'U' (%)", min_va
 pesos_grade_financeiro = {
     "A": 1.00, 
     "B": 0.9, 
-    "C": 0.60, 
-    "D": 0.35, 
-    "E": 0.10, 
+    "C": 0.8, 
+    "D": 0.7, 
+    "E": 0.6, 
     "U": peso_grade_u # Peso dinâmico definido por você
 }
 df["peso_venda"] = df["Grade"].map(pesos_grade_financeiro).fillna(0)
