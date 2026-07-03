@@ -17,7 +17,7 @@ st.set_page_config(
 # ======================================================
 @st.cache_data
 def carregar_dados(file):
-    df = pd.read_excel(file, header=6)
+    df = pd.read_excel(file, header=1)
     
     # Prevenção de variações de nomenclatura de colunas
     df = df.rename(columns={"Condição\n(Grade)": "Grade", "Condição (Grade)": "Grade"})
