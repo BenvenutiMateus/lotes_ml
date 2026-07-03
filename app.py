@@ -191,13 +191,13 @@ with col_chart1:
     })
     df_score["Contribuição Final"] = df_score["Peso"] * df_score["Score Obtido"]
 
-    chart_score = alt.Chart(df_score).mark_bar(cornerRadiusEnd=4).encode(
+    chart_score = alt.Chart(df_score).mark_bar(cornerRadiusBottomRight=4, cornerRadiusTopRight=4).encode(
         x=alt.X("Contribuição Final:Q", title="Pontos Adicionados"),
         y=alt.Y("Componente:N", sort="-x", title=None),
         color=alt.Color("Componente:N", legend=None),
         tooltip=["Componente", alt.Tooltip("Score Obtido:Q", format=".2f"), alt.Tooltip("Contribuição Final:Q", format=".3f")]
     ).properties(height=300)
-    st.altair_chart(chart_score, use_container_width=True)
+    st.altair_chart(chart_score, width='stretch')
 
 with col_chart2:
     st.markdown("##### Concentração Financeira (Categoria x Grade)")
@@ -208,7 +208,7 @@ with col_chart2:
         color=alt.Color("Valor Total:Q", scale=alt.Scale(scheme="reds"), title="Capital (R$)"),
         tooltip=["Categoria", "Grade", alt.Tooltip("Valor Total:Q", format=",.2f")]
     ).properties(height=300)
-    st.altair_chart(heatmap, use_container_width=True)
+    st.altair_chart(heatmap, width='stretch')
 
 # ======================================================
 # 🎯 SCATTER – MATRIZ DE RISCO vs CAPITAL (INTERATIVO)
@@ -248,7 +248,7 @@ scatter = alt.Chart(df).mark_circle(opacity=0.6).encode(
 linha_risco = alt.Chart(pd.DataFrame({'x': [0.6]})).mark_rule(color='red', strokeDash=[5, 5]).encode(x='x')
 linha_capital = alt.Chart(pd.DataFrame({'y': [df['Valor Total'].mean() * 2]})).mark_rule(color='orange', strokeDash=[5, 5]).encode(y='y')
 
-st.altair_chart(scatter + linha_risco + linha_capital, use_container_width=True)
+st.altair_chart(scatter + linha_risco + linha_capital, width='stretch')
 
 # ======================================================
 # 📈 ANÁLISES DETALHADAS
@@ -261,41 +261,41 @@ col_det1, col_det2 = st.columns(2)
 with col_det1:
     st.markdown("##### 📊 Distribuição por Grade")
     grade_df = df.groupby("Grade").agg({"Valor Total": "sum", "Qtd": "sum"}).reset_index()
-    chart_grade = alt.Chart(grade_df).mark_bar(cornerRadiusTop=4).encode(
+    chart_grade = alt.Chart(grade_df).mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4).encode(
         x=alt.X("Grade:N", sort=["A", "B", "C", "D", "E", "U"]),
         y=alt.Y("Valor Total:Q", title="Valor Total (R$)"),
         color=alt.Color("Grade:N", scale=cores_grade_chart, legend=None),
         tooltip=["Grade", "Qtd", alt.Tooltip("Valor Total:Q", format=",.2f")]
     ).properties(height=350)
-    st.altair_chart(chart_grade, use_container_width=True)
+    st.altair_chart(chart_grade, width='stretch')
 
 with col_det2:
     if "Subcategoria" in df.columns:
         st.markdown("##### 📑 Top 10 Subcategorias por Valor")
         sub_df = df.groupby("Subcategoria")["Valor Total"].sum().reset_index().sort_values("Valor Total", ascending=False).head(10)
-        chart_sub = alt.Chart(sub_df).mark_bar(cornerRadiusEnd=4).encode(
+        chart_sub = alt.Chart(sub_df).mark_bar(cornerRadiusBottomRight=4, cornerRadiusTopRight=4).encode(
             x=alt.X("Valor Total:Q", title="Valor Total (R$)"),
             y=alt.Y("Subcategoria:N", sort="-x", title="Subcategoria"),
             color=alt.value("#3498db"),
             tooltip=["Subcategoria", alt.Tooltip("Valor Total:Q", format=",.2f")]
         ).properties(height=350)
-        st.altair_chart(chart_sub, use_container_width=True)
+        st.altair_chart(chart_sub, width='stretch')
     elif "Categoria" in df.columns:
         st.markdown("##### 📑 Categorias por Valor")
         cat_df = df.groupby("Categoria")["Valor Total"].sum().reset_index().sort_values("Valor Total", ascending=False).head(10)
-        chart_cat = alt.Chart(cat_df).mark_bar(cornerRadiusEnd=4).encode(
+        chart_cat = alt.Chart(cat_df).mark_bar(cornerRadiusBottomRight=4, cornerRadiusTopRight=4).encode(
             x=alt.X("Valor Total:Q", title="Valor Total (R$)"),
             y=alt.Y("Categoria:N", sort="-x", title="Categoria"),
             color=alt.value("#3498db"),
             tooltip=["Categoria", alt.Tooltip("Valor Total:Q", format=",.2f")]
         ).properties(height=350)
-        st.altair_chart(chart_cat, use_container_width=True)
+        st.altair_chart(chart_cat, width='stretch')
 
 st.markdown("##### 🏆 Top 10 Itens Mais Valiosos do Lote")
 colunas_top = ["Descrição do Item", "Categoria", "Subcategoria", "Grade", "Qtd", "Valor Unit", "Valor Total"]
 colunas_existentes = [col for col in colunas_top if col in df.columns]
 top10_df = df.sort_values("Valor Total", ascending=False).head(10)[colunas_existentes]
-st.dataframe(top10_df, use_container_width=True, hide_index=True)
+st.dataframe(top10_df, width='stretch', hide_index=True)
 
 
 # ======================================================
@@ -390,4 +390,41 @@ chart_financeiro = alt.Chart(df_waterfall).mark_bar().encode(
     tooltip=["Etapa", alt.Tooltip("Valor (R$):Q", format=",.2f")]
 ).properties(height=350, title="Decomposição de Valor (De onde o dinheiro sai)")
 
-st.altair_chart(chart_financeiro, use_container_width=True)
+st.altair_chart(chart_financeiro, width='stretch')
+
+
+# ======================================================
+# 💸 SIMULADOR DE LUCRO PROJETADO (REALIDADE)
+# ======================================================
+st.divider()
+st.title("💸 Simulador de Lucro Projetado")
+
+st.markdown("""
+Insira o valor pelo qual o lote está sendo vendido para projetar seu ganho real.
+Por padrão, calculamos 30% de custos adicionais sobre a receita esperada e 10% de desconto para promoção/venda rápida.
+""")
+
+col_proj1, col_proj2, col_proj3 = st.columns(3)
+
+preco_lote = col_proj1.number_input("💵 Preço do Lote (R$)", min_value=0.0, value=0.0, step=100.0)
+custos_adicionais_proj = col_proj2.number_input("⚙️ Custos Adicionais (%)", min_value=0, max_value=100, value=30, help="Custos operacionais, taxas e impostos") / 100
+promocao_proj = col_proj3.number_input("📉 Promoção / Desconto (%)", min_value=0, max_value=100, value=10, help="Desconto aplicado ao valor recuperável para girar o estoque") / 100
+
+# Re-utilizamos valor_recuperavel do cálculo anterior
+faturamento_projetado = valor_recuperavel * (1 - promocao_proj)
+despesas_projetadas = faturamento_projetado * custos_adicionais_proj
+lucro_projetado = faturamento_projetado - despesas_projetadas - preco_lote
+
+st.markdown("### Resultado da Projeção")
+
+metric_p1, metric_p2, metric_p3, metric_p4 = st.columns(4)
+metric_p1.metric("Faturamento c/ Promoção", f"R$ {faturamento_projetado:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+metric_p2.metric("Custos Adicionais", f"R$ {despesas_projetadas:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+metric_p3.metric("Custo do Lote", f"R$ {preco_lote:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+
+if lucro_projetado >= 0:
+    metric_p4.metric("✅ Lucro Líquido Projetado", f"R$ {lucro_projetado:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+    st.success(f"Comprando por **R$ {preco_lote:,.2f}**, a projeção de lucro é de **R$ {lucro_projetado:,.2f}**.")
+else:
+    metric_p4.metric("❌ Prejuízo Projetado", f"R$ {lucro_projetado:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+    st.error(f"Comprando por **R$ {preco_lote:,.2f}**, a projeção é de PREJUÍZO de **R$ {abs(lucro_projetado):,.2f}**.")
