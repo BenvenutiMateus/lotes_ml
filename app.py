@@ -62,7 +62,7 @@ if df.empty:
 # ======================================================
 # 🎨 GRADES E CÁLCULOS BASE
 # ======================================================
-pesos_grade = {"A": 1.00, "B": 0.75, "C": 0.50, "D": 0.30, "E": 0.15, "U": 0.10}
+pesos_grade = {"A": 1.00, "B": 0.8, "C": 0.60, "D": 0.50, "E": 0.4, "U": 0.3}
 df["peso_grade"] = df["Grade"].map(pesos_grade).fillna(0)
 
 qtd_total = df["Qtd"].sum()
@@ -92,7 +92,7 @@ score_diversificacao = 1 - hhi
 # 3️⃣ TICKET MÉDIO SAUDÁVEL (0–1)
 # ======================================================
 ticket_medio = valor_total_lote / qtd_total
-ticket_min = 80
+ticket_min = 200
 
 if ticket_medio >= ticket_min:
     score_ticket = 1
