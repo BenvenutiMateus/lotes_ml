@@ -13,6 +13,10 @@ dependencies = [
     "openpyxl>=3.1.5,<4.0",
     "numpy>=2.2.6",
     "altair>=6.2.2",
+    "black>=26.5.1",
+    "isort>=8.0.1",
+    "jupyterlab-code-formatter>=3.0.3",
+    "python-lsp-server>=1.14.0",
 ]
 
 [dependency-groups]

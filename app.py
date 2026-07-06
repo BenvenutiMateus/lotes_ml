@@ -305,27 +305,26 @@ st.divider()
 st.title("💰 Simulador Financeiro Integrado")
 
 st.markdown("""
-Calcule o **lance máximo (Preço Teto)** seguro para garantir sua margem e simule o **lucro real** com base no preço real de compra do lote.
-Ajuste os parâmetros de custos, descontos e o aproveitamento esperado para cada condição (Grade) do produto.
+Calcule o ** Lucro esperado ** a partir de custos adicionais, aproveitamento
 """)
 
 st.markdown("#### 1. Parâmetros da Operação")
-col_sim1, col_sim2, col_sim3, col_sim4 = st.columns(4)
+col_sim1, col_sim2, col_sim3 = st.columns(3)
 
 
-custos_operacionais = col_sim2.number_input("⚙️ Custos Adicionais (%)", min_value=0, max_value=100, value=30, help="Custos operacionais, taxas de marketplace, impostos") / 100
-desconto_venda = col_sim3.number_input("📉 Promoção / Desconto (%)", min_value=0, max_value=100, value=10, help="Desconto aplicado ao valor recuperável para vender mais rápido") / 100
-preco_lote = col_sim4.number_input("💵 Custo Real do Lote (R$)", min_value=0.0, value=0.0, step=100.0, help="Preço pelo qual você pretende comprar ou comprou o lote")
+custos_operacionais = col_sim1.number_input("⚙️ Custos Adicionais (%)", min_value=0, max_value=100, value=30, help="Custos operacionais, taxas de marketplace, impostos") / 100
+desconto_venda = col_sim2.number_input("📉 Promoção / Desconto (%)", min_value=0, max_value=100, value=10, help="Desconto aplicado ao valor recuperável para vender mais rápido") / 100
+preco_lote = col_sim3.number_input("💵 Custo Real do Lote (R$)", min_value=0.0, value=0.0, step=100.0, help="Preço pelo qual você pretende comprar ou comprou o lote")
 
 st.markdown("#### 2. Aproveitamento Esperado por Grade (%)")
 col_g1, col_g2, col_g3, col_g4, col_g5, col_g6 = st.columns(6)
 
 peso_a = col_g1.number_input("Grade A", min_value=0, max_value=100, value=100) / 100
-peso_b = col_g2.number_input("Grade B", min_value=0, max_value=100, value=90) / 100
-peso_c = col_g3.number_input("Grade C", min_value=0, max_value=100, value=60) / 100
-peso_d = col_g4.number_input("Grade D", min_value=0, max_value=100, value=35) / 100
-peso_e = col_g5.number_input("Grade E", min_value=0, max_value=100, value=10) / 100
-peso_u = col_g6.number_input("Grade U", min_value=0, max_value=100, value=25) / 100
+peso_b = col_g2.number_input("Grade B", min_value=0, max_value=100, value=100) / 100
+peso_c = col_g3.number_input("Grade C", min_value=0, max_value=100, value=80) / 100
+peso_d = col_g4.number_input("Grade D", min_value=0, max_value=100, value=60) / 100
+peso_e = col_g5.number_input("Grade E", min_value=0, max_value=100, value=60) / 100
+peso_u = col_g6.number_input("Grade U", min_value=0, max_value=100, value=50) / 100
 
 pesos_grade_financeiro = {
     "A": peso_a,
@@ -351,8 +350,6 @@ faturamento_estimado = valor_recuperavel * (1 - desconto_venda)
 # 4. Deduções
 despesas_totais = faturamento_estimado * custos_operacionais
 
-# 5. PREÇO TETO DE COMPRA
-preco_teto = faturamento_estimado - despesas_totais - lucro_em_reais_teto
 
 # 6. LUCRO PROJETADO (REAL)
 lucro_projetado = faturamento_estimado - despesas_totais - preco_lote
@@ -367,22 +364,16 @@ metric3.metric("3. Faturamento Esperado", f"R$ {faturamento_estimado:,.2f}".repl
 metric4.metric("4. Custos Adicionais", f"R$ {despesas_totais:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
 
 st.markdown("---")
-col_res1, col_res2 = st.columns(2)
 
-with col_res1:
-    st.info(f"🎯 **PREÇO TETO (LANCE MÁXIMO):** R$ {preco_teto:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-    st.caption(f"Valor limite de compra para garantir um lucro de {margem_lucro*100:.0f}% (R$ {lucro_em_reais_teto:,.2f}).")
-
-with col_res2:
-    if preco_lote > 0:
-        if lucro_projetado >= 0:
-            st.success(f"✅ **LUCRO PROJETADO:** R$ {lucro_projetado:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-            st.caption(f"Comprando por R$ {preco_lote:,.2f}, este será o seu lucro estimado.")
-        else:
-            st.error(f"❌ **PREJUÍZO PROJETADO:** R$ {abs(lucro_projetado):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-            st.caption(f"Comprando por R$ {preco_lote:,.2f}, a operação resulta em prejuízo.")
+if preco_lote > 0:
+    if lucro_projetado >= 0:
+        st.success(f"✅ **LUCRO PROJETADO:** R$ {lucro_projetado:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+        st.caption(f"Comprando por R$ {preco_lote:,.2f}, este será o seu lucro estimado.")
     else:
-        st.warning("⚠️ Insira o 'Custo Real do Lote' para ver a projeção de lucro.")
+        st.error(f"❌ **PREJUÍZO PROJETADO:** R$ {abs(lucro_projetado):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+        st.caption(f"Comprando por R$ {preco_lote:,.2f}, a operação resulta em prejuízo.")
+else:
+    st.warning("⚠️ Insira o 'Custo Real do Lote' para ver a projeção de lucro.")
 
 # Gráfico de Cascata (Waterfall) simulado em barras para demonstrar a "mordida" no valor
 df_waterfall = pd.DataFrame({
@@ -391,16 +382,17 @@ df_waterfall = pd.DataFrame({
         "2. Perda por Avarias", 
         "3. Desconto de Venda",
         "4. Custos Operacionais", 
-        "5. SEU LUCRO (Preço Teto)",
-        "👉 LANCE MÁXIMO"
+        "5. Custo pago ao ML",
+        "6. SEU LUCRO (Preço Teto)",
     ],
     "Valor (R$)": [
         valor_tabela_total,
         -(valor_tabela_total - valor_recuperavel),
         -(valor_recuperavel - faturamento_estimado),
         -despesas_totais,
-        -lucro_em_reais_teto,
-        preco_teto
+        -preco_lote,
+        l
+        lucro_projetado
     ]
 })
 
