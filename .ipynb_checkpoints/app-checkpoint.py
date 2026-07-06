@@ -391,7 +391,6 @@ df_waterfall = pd.DataFrame({
         -(valor_recuperavel - faturamento_estimado),
         -despesas_totais,
         -preco_lote,
-        l
         lucro_projetado
     ]
 })
