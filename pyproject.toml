@@ -1,16 +1,24 @@
-[tool.poetry]
-name = "dashboard-lotes"
+[project]
+name = "lotes_ml"
 version = "0.1.0"
-description = ""
-authors = ["Mateus Benvenuti <mateusjbenvenuti@gmail.com>"]
+description = "Análise de lotes do mercado livre"
+authors = [
+    {name = "Mateus Benvenuti", email = "mateusjbenvenuti@gmail.com"}
+]
 readme = "README.md"
-package-mode = false
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "pandas>=1.4,<3",
+    "streamlit>=1.32,<2.0",
+    "openpyxl>=3.1.5,<4.0",
+    "numpy>=2.2.6",
+    "altair>=6.2.2",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.14"
-pandas = ">=1.4,<3"
-streamlit = ">=1.32,<2.0"
-openpyxl = ">=3.1.5,<4.0"
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1"
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
